@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-time Button Selection</title>
+    <style>
+        .selected {
+            background-color: #ccc;
+        }
+    </style>
+<!--    <script src="assets/js/socket.js"></script>-->
+<!--    <script src="assets/js/jquery.js"></script>-->
+<!--    <script type="text/javascript">-->
+<!--        var socket;-->
+<!--        function conn(){-->
+<!--            if(!socket){-->
+<!--                socket = createSocket("123");-->
+<!--            }-->
+
+<!--        }-->
+<!--        function sendMsg(){-->
+<!--            var content = $("#content").val();-->
+<!--            socket.send("客户端A"+content);-->
+<!--        }-->
+
+<!--    </script>-->
+
+
+    <script type="text/javascript">
+        var ws = null;
+        // 加入
+        function join() {
+            var username = document.getElementById('uid').value;
+
+            var url = "ws://localhost:8080/ws/"+username;
+            //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+            ws = new WebSocket(url);
+
+            ws.onmessage = function(event){
+                var ta = document.getElementById('responseText');
+                ta.value += event.data+"\r\n";
+            };
+            ws.onopen = function(event){
+                var ta = document.getElementById('responseText');
+                ta.value += "建立 websocket 连接... \r\n";
+            };
+            ws.onclose = function(event){
+                var ta = document.getElementById('responseText');
+                ta.value += "用户["+username+"] 已经离开聊天室! \r\n";
+                ta.value += "关闭 websocket 连接. \r\n";
+            };
+        }
+
+        // 退出
+        function exit(){
+            if(ws) {
+                ws.close();
+            }
+        }
+
+        // 发送消息
+        function send(){
+            var message = document.getElementById('message').value;
+            if(!window.WebSocket){return;}
+            if(ws.readyState == WebSocket.OPEN){
+                ws.send(message);
+            }else{
+                alert("WebSocket 连接没有建立成功！");
+            }
+        }
+    </script>
+
+</head>
+<body>
+
+
+<form onSubmit="return false;">
+    <h3>聊天室</h3>
+    <textarea id="responseText" style="width: 1024px;height: 300px;"></textarea>
+    <br/>
+    <br />
+    <label>昵称 : </label><input type="text" id="uid" /> &nbsp;
+    <input type="button" value="加入聊天室" onClick="join()" /> &nbsp;
+
+    <input type="button" value="离开聊天室" onClick="exit()" />
+    <br />
+    <br />
+    <label>消息 : </label><input type="text" id="message" /> &nbsp; <input type="button" value="发送消息" onClick="send()" />
+</form>
+
+
+</body>
+</html>
