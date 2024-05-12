@@ -40,4 +40,14 @@ public final class WebSocketUtils {
     public static void sendMessageAll(String message) {
         ONLINE_USER_SESSIONS.forEach((sessionId, session) -> sendMessage(session, message));
     }
+
+    /**
+     * 广播按钮状态
+     * @param buttonId
+     * @param isSelected
+     */
+    static void broadcastButtonState(String buttonId, boolean isSelected) {
+        String message = "{\"type\": \"buttonState\", \"buttonId\": \"" + buttonId + "\", \"isSelected\": " + isSelected + "}";
+        ONLINE_USER_SESSIONS.forEach((sessionId, session) -> sendMessage(session, message));
+    }
 }

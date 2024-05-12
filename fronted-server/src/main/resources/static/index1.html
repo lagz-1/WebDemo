@@ -4,30 +4,29 @@
     <meta charset="UTF-8">
     <title>Real-time Button Selection</title>
     <style>
-        .selected {
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            width: 300px; /* Adjust the width as needed */
+            margin: 0 auto;
+        }
+        .button-grid button {
+            width: 100%; /* Ensure each button takes up the full width of its cell */
+            height: max(50px, fit-content);
+        }
+
+        .button-grid button.selected {
             background-color: #ccc;
+            pointer-events: none;
         }
     </style>
-<!--    <script src="assets/js/socket.js"></script>-->
-<!--    <script src="assets/js/jquery.js"></script>-->
-<!--    <script type="text/javascript">-->
-<!--        var socket;-->
-<!--        function conn(){-->
-<!--            if(!socket){-->
-<!--                socket = createSocket("123");-->
-<!--            }-->
-
-<!--        }-->
-<!--        function sendMsg(){-->
-<!--            var content = $("#content").val();-->
-<!--            socket.send("客户端A"+content);-->
-<!--        }-->
-
-<!--    </script>-->
 
 
     <script type="text/javascript">
         var ws = null;
+
         // 加入
         function join() {
             var username = document.getElementById('uid').value;
@@ -39,7 +38,28 @@
             ws.onmessage = function(event){
                 var ta = document.getElementById('responseText');
                 ta.value += event.data+"\r\n";
+                // 处理服务器推送的消息
+                var message = JSON.parse(event.data);
+                ta.value += message.type +"\r\n";
+
+                if (message.type == 'buttonState') {
+                        // 更新按钮的状态
+                        var buttonId = message.buttonId;
+                        var isSelected = message.isSelected;
+                        var button = document.getElementById(buttonId);
+                        if (button) {
+                            if (isSelected) {
+                                button.classList.add('selected');
+                                button.disabled = true;
+                            } else {
+                                button.classList.remove('selected');
+                                button.disabled = false;
+                            }
+                        }
+                    }
+
             };
+
             ws.onopen = function(event){
                 var ta = document.getElementById('responseText');
                 ta.value += "建立 websocket 连接... \r\n";
@@ -58,9 +78,8 @@
             }
         }
 
-        // 发送消息
-        function send(){
-            var message = document.getElementById('message').value;
+        function send(message){
+            // var message = document.
             if(!window.WebSocket){return;}
             if(ws.readyState == WebSocket.OPEN){
                 ws.send(message);
@@ -68,6 +87,14 @@
                 alert("WebSocket 连接没有建立成功！");
             }
         }
+
+        // 处理服务器推送的消息
+
+
+
+
+
+
     </script>
 
 </head>
@@ -86,7 +113,38 @@
     <br />
     <br />
     <label>消息 : </label><input type="text" id="message" /> &nbsp; <input type="button" value="发送消息" onClick="send()" />
+
+
+
 </form>
+
+<div id="buttonGrid" class="button-grid"></div>
+
+<script>
+    function createButtonMatrix(rows, cols) {
+        const gridContainer = document.getElementById('buttonGrid');
+        gridContainer.innerHTML = ''; // Clear any existing content
+
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const button = document.createElement('button');
+                button.textContent = `Button ${i * cols + j + 1}`;
+                button.id = `Button ${i * cols + j + 1}`;
+                button.addEventListener('click', function() {
+                    send(button.textContent+":"+"ButtonClicked");
+                });
+                gridContainer.appendChild(button);
+            }
+        }
+    }
+
+    // Call the function to create the 8x8 button matrix
+    createButtonMatrix(8, 8);
+</script>
+
+
+
+</div>
 
 
 </body>

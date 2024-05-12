@@ -10,10 +10,10 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.example.ws.WebSocketUtils.ONLINE_USER_SESSIONS;
-import static org.example.ws.WebSocketUtils.sendMessageAll;
+import static org.example.ws.WebSocketUtils.*;
 
 
 @Slf4j
@@ -23,27 +23,7 @@ import static org.example.ws.WebSocketUtils.sendMessageAll;
 public class OrderWsListener {
     private static final Logger logger = LoggerFactory.getLogger(OrderWsListener.class);
     public static ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
-//    @OnOpen
-//    public void onOpen(@PathParam("token") String token,Session session){
-//        System.out.println("建立会话");
-//        clients.put(token,session);
-//    }
-
-//    @OnMessage
-//    public void onMessage(String message, Session session) throws IOException {
-//        log.info("服务端收到客户端：{} ；消息：{}", session.getId(), message);
-//        session.getBasicRemote().sendText(message);// 回复消息
-//    }
-//
-//    @OnError
-//    public void onError(Throwable e){
-//        e.printStackTrace();
-//    }
-//    @OnClose
-//    public void onClose(@PathParam("token") String token){
-//        System.out.println("会话关闭");
-//        clients.remove(token);
-//    }
+    private static final Map<String, Boolean> BUTTON_STATES = new ConcurrentHashMap<>();
 
 
     @OnOpen
@@ -55,9 +35,27 @@ public class OrderWsListener {
     }
 
     @OnMessage
-    public void onMessage(@PathParam("username") String username, String message) {
-        logger.info("发送消息："+message);
-        sendMessageAll("用户[" + username + "] : " + message);
+    public void onMessage(@PathParam("username") String username,String message) {
+//        logger.info("发送消息："+message);
+//        sendMessageAll("用户[" + username + "] : " + message);
+
+
+        String[] parts = message.split(":");
+        String buttonId="",action="";
+            if (parts.length == 2) {
+                buttonId = parts[0];
+                action = parts[1];
+                // 根据buttonId和action进行处理
+                // ...
+            }
+
+        if ("ButtonClicked".equals(action)) {
+            boolean isSelected = BUTTON_STATES.getOrDefault(buttonId, false);
+            BUTTON_STATES.put(buttonId, !isSelected);
+            broadcastButtonState(buttonId, !isSelected);
+        } else if ("ButtonCreated".equals(action)) {
+            BUTTON_STATES.putIfAbsent(buttonId, false);
+        }
     }
 
     @OnClose
@@ -82,6 +80,8 @@ public class OrderWsListener {
         }
         logger.info("Throwable msg "+throwable.getMessage());
     }
+
+
 
 
 }
