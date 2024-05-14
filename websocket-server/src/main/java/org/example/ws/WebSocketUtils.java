@@ -50,4 +50,15 @@ public final class WebSocketUtils {
         String message = "{\"type\": \"buttonState\", \"buttonId\": \"" + buttonId + "\", \"isSelected\": " + isSelected + "}";
         ONLINE_USER_SESSIONS.forEach((sessionId, session) -> sendMessage(session, message));
     }
+
+    /**
+     * 初始化每一个用户进来看到的按钮状态并进行广播
+     * @param buttonId
+     * @param isSelected
+     */
+    static void initButtonState(String buttonId, boolean isSelected) {
+        String message = "{\"type\": \"buttonState\", \"buttonId\": \"" + buttonId + "\", \"isSelected\": " + isSelected + "}";
+        ONLINE_USER_SESSIONS.forEach((sessionId, session) -> sendMessage(session, message));
+    }
+
 }

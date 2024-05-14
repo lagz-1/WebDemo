@@ -25,11 +25,14 @@
 
 
     <script type="text/javascript">
+
+
+
         var ws = null;
 
         // 加入
-        function join() {
-            var username = document.getElementById('uid').value;
+        function join(username) {
+            // var username = document.getElementById('uid').value;
 
             var url = "ws://localhost:8080/ws/"+username;
             //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
@@ -63,6 +66,9 @@
             ws.onopen = function(event){
                 var ta = document.getElementById('responseText');
                 ta.value += "建立 websocket 连接... \r\n";
+
+                ws.send("all"+":"+"initialize");
+
             };
             ws.onclose = function(event){
                 var ta = document.getElementById('responseText');
@@ -88,12 +94,11 @@
             }
         }
 
-        // 处理服务器推送的消息
+        function randomName(number) {
+            return Math.random().toString(10).substr(2, number);
+        }
 
-
-
-
-
+        join(randomName(5));
 
     </script>
 
@@ -121,6 +126,43 @@
 <div id="buttonGrid" class="button-grid"></div>
 
 <script>
+
+    // // 假设你有一个后端服务器端点，它返回按钮数量
+    // function getButtonCount() {
+    //     return fetch('/getButtonCount') // 替换为你的后端服务器端点
+    //         .then(response => response.json())
+    //         .then(data => data.buttonCount);
+    // }
+    //
+    // // 使用从Redis获取的按钮数量创建按钮矩阵
+    // async function createButtonMatrix() {
+    //     const buttonCount = await getButtonCount();
+    //     const rows = Math.ceil(Math.sqrt(buttonCount)); // 计算行数
+    //     const cols = Math.ceil(buttonCount / rows); // 计算列数
+    //
+    //     const gridContainer = document.getElementById('buttonGrid');
+    //     gridContainer.innerHTML = ''; // 清除现有内容
+    //
+    //     for (let i = 0; i < rows; i++) {
+    //         const row = document.createElement('div');
+    //         row.className = 'button-row';
+    //         for (let j = 0; j < cols && i * cols + j < buttonCount; j++) {
+    //             const button = document.createElement('button');
+    //             button.textContent = `Button ${i * cols + j + 1}`;
+    //             button.id = `button-${i * cols + j + 1}`;
+    //             button.addEventListener('click', function() {
+    //                 send(button.id + ":" + "ButtonClicked");
+    //             });
+    //             row.appendChild(button);
+    //         }
+    //         gridContainer.appendChild(row);
+    //     }
+    // }
+    //
+    // // 调用函数来创建按钮矩阵
+    // createButtonMatrix();
+
+
     function createButtonMatrix(rows, cols) {
         const gridContainer = document.getElementById('buttonGrid');
         gridContainer.innerHTML = ''; // Clear any existing content
@@ -140,6 +182,7 @@
 
     // Call the function to create the 8x8 button matrix
     createButtonMatrix(8, 8);
+
 </script>
 
 

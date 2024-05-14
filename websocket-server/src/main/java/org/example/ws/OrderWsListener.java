@@ -10,7 +10,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.example.ws.WebSocketUtils.*;
@@ -23,15 +23,15 @@ import static org.example.ws.WebSocketUtils.*;
 public class OrderWsListener {
     private static final Logger logger = LoggerFactory.getLogger(OrderWsListener.class);
     public static ConcurrentHashMap<String, Session> clients = new ConcurrentHashMap<>();
-    private static final Map<String, Boolean> BUTTON_STATES = new ConcurrentHashMap<>();
-
-
+    public static ConcurrentHashMap<String, Boolean> BUTTON_STATES = new ConcurrentHashMap<>();
+    public static Vector<String> SELECTED_BUTTONS = new Vector<>();
     @OnOpen
     public void openSession(@PathParam("username") String username, Session session) {
         ONLINE_USER_SESSIONS.put(username, session);
         String message = "欢迎用户[" + username + "] 来到聊天室！";
         logger.info("用户登录："+message);
         sendMessageAll(message);
+
     }
 
     @OnMessage
@@ -51,10 +51,17 @@ public class OrderWsListener {
 
         if ("ButtonClicked".equals(action)) {
             boolean isSelected = BUTTON_STATES.getOrDefault(buttonId, false);
-            BUTTON_STATES.put(buttonId, !isSelected);
-            broadcastButtonState(buttonId, !isSelected);
+            BUTTON_STATES.put(buttonId, true);
+            broadcastButtonState(buttonId, true);
         } else if ("ButtonCreated".equals(action)) {
             BUTTON_STATES.putIfAbsent(buttonId, false);
+        } else if ("initialize".equals(action)) {
+
+            BUTTON_STATES.forEach((_buttonId, isSelected) -> {
+            if(isSelected){
+                initButtonState(_buttonId, isSelected);
+            }
+        });
         }
     }
 
